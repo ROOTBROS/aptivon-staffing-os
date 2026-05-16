@@ -10,6 +10,8 @@ import {
 
 import appCss from "../styles.css?url";
 import { AppLayout } from "@/components/AppLayout";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
 
 function NotFoundComponent() {
   return (
@@ -114,7 +116,34 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppLayout />
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthGate() {
+  const { session, loading } = useAuth();
+  const router = useRouter();
+  const path = typeof window !== "undefined" ? window.location.pathname : "/";
+  const isLoginPage = path === "/login";
+
+  useEffect(() => {
+    if (loading) return;
+    if (!session && !isLoginPage) {
+      router.navigate({ to: "/login" });
+    }
+  }, [loading, session, isLoginPage, router]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
+        Loading…
+      </div>
+    );
+  }
+  if (isLoginPage) return <Outlet />;
+  if (!session) return null;
+  return <AppLayout />;
 }
