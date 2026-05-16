@@ -131,14 +131,17 @@ function AuthGate() {
   const { session, loading } = useAuth();
   const router = useRouter();
   const path = typeof window !== "undefined" ? window.location.pathname : "/";
-  const isLoginPage = path === "/login";
+  const isPublicPage = path === "/login" || path === "/";
 
   useEffect(() => {
     if (loading) return;
-    if (!session && !isLoginPage) {
+    if (!session && !isPublicPage) {
       router.navigate({ to: "/login" });
     }
-  }, [loading, session, isLoginPage, router]);
+    if (session && path === "/") {
+      router.navigate({ to: "/dashboard" });
+    }
+  }, [loading, session, isPublicPage, path, router]);
 
   if (loading) {
     return (
@@ -147,7 +150,8 @@ function AuthGate() {
       </div>
     );
   }
-  if (isLoginPage) return <Outlet />;
+  if (path === "/" && !session) return <Outlet />;
+  if (path === "/login") return <Outlet />;
   if (!session) return null;
   return <AppLayout />;
 }
