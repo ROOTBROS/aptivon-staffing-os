@@ -21,7 +21,14 @@ import {
 import logo from "@/assets/aptivon-logo.png";
 import { cn } from "@/lib/utils";
 
-const nav = [
+type NavItem = {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+};
+
+const nav: NavItem[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/companies", label: "Companies", icon: Building2 },
   { to: "/contacts", label: "Contacts", icon: Users },
@@ -33,7 +40,7 @@ const nav = [
   { to: "/tasks", label: "Tasks", icon: CheckSquare },
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: Settings },
-] as const;
+];
 
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -68,9 +75,9 @@ export function AppLayout() {
             const Icon = item.icon;
             const active = item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to);
             return (
-              <Link
+          <Link
                 key={item.to}
-                to={item.to}
+                to={item.to as string}
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 py-2 text-[10px] font-medium",
                   active ? "text-accent" : "text-muted-foreground",
