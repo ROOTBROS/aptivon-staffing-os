@@ -76,7 +76,7 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
   return (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
-        <img src={logo} alt="Aptivon" className="h-7 w-auto brightness-0 invert" />
+        <img src={logo} alt="Aptivon" className="h-7 w-auto" />
       </div>
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {nav.map((item) => {
@@ -84,9 +84,11 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
           const active = item.exact ? currentPath === item.to : currentPath.startsWith(item.to);
           return (
             <Link key={item.to} to={item.to} onClick={onNavigate}
-              className={cn("group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active ? "bg-sidebar-accent text-sidebar-primary-foreground" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground")}>
-              <Icon className={cn("h-4 w-4", active ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground")} />
+              className={cn("group flex items-center gap-3 rounded-md border-l-2 px-3 py-2 text-sm font-medium transition-colors",
+                active
+                  ? "border-accent bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "border-transparent text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground")}>
+              <Icon className={cn("h-4 w-4", active ? "text-accent" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground")} />
               {item.label}
             </Link>
           );
