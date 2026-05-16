@@ -75,8 +75,8 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
   const { profile, user, signOut, isAdmin } = useAuth();
   return (
     <>
-      <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
-        <img src={logo} alt="Aptivon" className="h-7 w-auto" />
+      <div className="flex h-24 items-center gap-2 border-b border-sidebar-border px-5">
+        <img src={logo} alt="Aptivon" className="h-20 w-auto" />
       </div>
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
         {nav.map((item) => {
