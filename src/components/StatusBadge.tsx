@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { statusTone } from "@/lib/sample-data";
+import { statusTone } from "@/lib/status";
 
 const toneClass: Record<string, string> = {
   success: "bg-[oklch(0.95_0.05_155)] text-[oklch(0.35_0.12_155)] ring-1 ring-inset ring-[oklch(0.65_0.16_155)]/30",
