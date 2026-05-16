@@ -9,10 +9,14 @@ type Profile = {
   role_label: string;
 };
 
+type AppRole = "admin" | "manager" | "recruiter";
+
 type AuthCtx = {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  role: AppRole | null;
+  isAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 };
@@ -21,6 +25,8 @@ const Ctx = createContext<AuthCtx>({
   user: null,
   session: null,
   profile: null,
+  role: null,
+  isAdmin: false,
   loading: true,
   signOut: async () => {},
 });
@@ -28,33 +34,35 @@ const Ctx = createContext<AuthCtx>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s?.user) {
-        // defer profile fetch to avoid deadlock
-        setTimeout(() => loadProfile(s.user.id), 0);
+        setTimeout(() => loadProfileAndRole(s.user.id), 0);
       } else {
         setProfile(null);
+        setRole(null);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      if (data.session?.user) loadProfile(data.session.user.id);
+      if (data.session?.user) loadProfileAndRole(data.session.user.id);
       setLoading(false);
     });
     return () => subscription.unsubscribe();
   }, []);
 
-  async function loadProfile(uid: string) {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, full_name, initials, role_label")
-      .eq("id", uid)
-      .maybeSingle();
-    if (data) setProfile(data);
+  async function loadProfileAndRole(uid: string) {
+    const [{ data: p }, { data: r }] = await Promise.all([
+      supabase.from("profiles").select("id, full_name, initials, role_label").eq("id", uid).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", uid),
+    ]);
+    if (p) setProfile(p);
+    const roles = (r ?? []).map((x) => x.role as AppRole);
+    setRole(roles.includes("admin") ? "admin" : roles.includes("manager") ? "manager" : roles.includes("recruiter") ? "recruiter" : null);
   }
 
   async function signOut() {
@@ -62,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ user: session?.user ?? null, session, profile, loading, signOut }}>
+    <Ctx.Provider value={{ user: session?.user ?? null, session, profile, role, isAdmin: role === "admin", loading, signOut }}>
       {children}
     </Ctx.Provider>
   );
