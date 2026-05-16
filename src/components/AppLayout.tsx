@@ -1,15 +1,16 @@
-import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Toaster } from "sonner";
 import { CreateProvider, useCreate, type EntityKind } from "@/components/CreateDialog";
 import {
   LayoutDashboard, Building2, Users, Briefcase, UserSearch, Send,
   CalendarClock, Trophy, CheckSquare, BarChart3, Settings,
-  Search, Plus, Bell, Menu, LogOut,
+  Search, Plus, Menu, LogOut,
 } from "lucide-react";
 import logo from "@/assets/aptivon-logo.png";
 import { cn } from "@/lib/utils";
+import { useCompanies, useContacts, useJobs, useCandidates } from "@/lib/queries";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 
@@ -139,10 +140,7 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
       <button type="button" onClick={onMenuClick} className="-ml-2 rounded-md p-2 text-muted-foreground hover:bg-muted lg:hidden" aria-label="Open menu">
         <Menu className="h-5 w-5" />
       </button>
-      <div className="relative flex flex-1 items-center">
-        <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
-        <input type="search" placeholder="Search candidates, companies, jobs…" className="h-10 w-full max-w-xl rounded-md border border-input bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
-      </div>
+      <GlobalSearch />
       <div className="relative">
         <button type="button" onClick={() => setMenuOpen((o) => !o)} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground shadow-sm hover:opacity-90">
           <Plus className="h-4 w-4" /><span className="hidden sm:inline">Quick create</span>
@@ -160,10 +158,107 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           </>
         )}
       </div>
-      <button type="button" className="relative rounded-md p-2 text-muted-foreground hover:bg-muted" aria-label="Notifications">
-        <Bell className="h-5 w-5" />
-        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-accent" />
-      </button>
     </header>
+  );
+}
+
+type SearchHit = {
+  id: string;
+  label: string;
+  sub?: string;
+  kind: "Company" | "Contact" | "Job" | "Candidate";
+  to: "/companies" | "/contacts" | "/jobs" | "/candidates";
+};
+
+function GlobalSearch() {
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const { data: companies = [] } = useCompanies();
+  const { data: contacts = [] } = useContacts();
+  const { data: jobs = [] } = useJobs();
+  const { data: candidates = [] } = useCandidates();
+
+  useEffect(() => {
+    function onDoc(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  const hits = useMemo<SearchHit[]>(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return [];
+    const match = (s?: string | null) => !!s && s.toLowerCase().includes(term);
+    const out: SearchHit[] = [];
+    for (const c of companies) {
+      if (match(c.name) || match(c.industry) || match(c.location))
+        out.push({ id: c.id, label: c.name, sub: c.industry ?? c.location ?? undefined, kind: "Company", to: "/companies" });
+    }
+    for (const c of contacts) {
+      if (match(c.name) || match(c.email) || match(c.company_name) || match(c.title))
+        out.push({ id: c.id, label: c.name, sub: [c.title, c.company_name].filter(Boolean).join(" · ") || undefined, kind: "Contact", to: "/contacts" });
+    }
+    for (const j of jobs) {
+      if (match(j.title) || match(j.company_name) || match(j.location))
+        out.push({ id: j.id, label: j.title, sub: [j.company_name, j.location].filter(Boolean).join(" · ") || undefined, kind: "Job", to: "/jobs" });
+    }
+    for (const k of candidates) {
+      if (match(k.name) || match(k.title) || match(k.location) || k.skills?.some((s) => match(s)))
+        out.push({ id: k.id, label: k.name, sub: [k.title, k.location].filter(Boolean).join(" · ") || undefined, kind: "Candidate", to: "/candidates" });
+    }
+    return out.slice(0, 12);
+  }, [q, companies, contacts, jobs, candidates]);
+
+  function go(hit: SearchHit) {
+    setOpen(false);
+    setQ("");
+    navigate({ to: hit.to });
+  }
+
+  return (
+    <div ref={wrapRef} className="relative flex flex-1 items-center">
+      <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
+      <input
+        type="search"
+        value={q}
+        onChange={(e) => { setQ(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && hits[0]) go(hits[0]);
+          if (e.key === "Escape") setOpen(false);
+        }}
+        placeholder="Search candidates, companies, jobs…"
+        className="h-10 w-full max-w-xl rounded-md border border-input bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
+      />
+      {open && q.trim() && (
+        <div className="absolute left-0 top-12 z-40 w-full max-w-xl overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-lg">
+          {hits.length === 0 ? (
+            <div className="px-3 py-4 text-sm text-muted-foreground">No results for "{q}"</div>
+          ) : (
+            <ul className="max-h-80 overflow-y-auto py-1">
+              {hits.map((h) => (
+                <li key={`${h.kind}-${h.id}`}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); go(h); }}
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-muted"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate font-medium text-foreground">{h.label}</div>
+                      {h.sub && <div className="truncate text-xs text-muted-foreground">{h.sub}</div>}
+                    </div>
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{h.kind}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
