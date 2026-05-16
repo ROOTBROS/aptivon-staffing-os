@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlacementsRouteImport } from './routes/placements'
 import { Route as JobsRouteImport } from './routes/jobs'
@@ -28,6 +29,11 @@ const TasksRoute = TasksRouteImport.update({
 const SubmissionsRoute = SubmissionsRouteImport.update({
   id: '/submissions',
   path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
+  '/settings': typeof SettingsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/reports'
+    | '/settings'
     | '/submissions'
     | '/tasks'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/reports'
+    | '/settings'
     | '/submissions'
     | '/tasks'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/reports'
+    | '/settings'
     | '/submissions'
     | '/tasks'
   fileRoutesById: FileRoutesById
@@ -156,6 +168,7 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   PlacementsRoute: typeof PlacementsRoute
   ReportsRoute: typeof ReportsRoute
+  SettingsRoute: typeof SettingsRoute
   SubmissionsRoute: typeof SubmissionsRoute
   TasksRoute: typeof TasksRoute
 }
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/submissions'
       fullPath: '/submissions'
       preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -244,9 +264,20 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   PlacementsRoute: PlacementsRoute,
   ReportsRoute: ReportsRoute,
+  SettingsRoute: SettingsRoute,
   SubmissionsRoute: SubmissionsRoute,
   TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
