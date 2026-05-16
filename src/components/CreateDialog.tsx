@@ -44,8 +44,9 @@ function useOptions(table: "companies" | "contacts" | "jobs" | "candidates", lab
   const [opts, setOpts] = useState<Option[]>([]);
   useEffect(() => {
     const col = table === "jobs" ? "title" : labelCol;
-    supabase.from(table).select(`id, ${col}`).order(col).then(({ data }) => {
-      setOpts((data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, label: (r[col] as string) ?? "—" })));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.from(table).select(`id, ${col}`).order(col) as any).then(({ data }: { data: Array<Record<string, unknown>> | null }) => {
+      setOpts((data ?? []).map((r) => ({ id: r.id as string, label: (r[col] as string) ?? "—" })));
     });
   }, [table, labelCol]);
   return opts;
@@ -101,7 +102,8 @@ function CreateForm({ kind, onDone }: { kind: EntityKind; onDone: () => void }) 
         payload = { ...payload, title: f.title, due_at: opt(f.due_at), priority: f.priority || "Medium", status: f.status || "Open", related_label: opt(f.related_label), owner_id: user.id };
       }
 
-      const { error } = await supabase.from(table).insert(payload as never);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase.from(table as any).insert(payload as any));
       if (error) throw error;
       toast.success(`${TITLES[kind]} created`);
       qc.invalidateQueries();
