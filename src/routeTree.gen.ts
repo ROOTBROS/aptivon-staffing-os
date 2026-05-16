@@ -14,6 +14,7 @@ import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlacementsRouteImport } from './routes/placements'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewsRouteImport } from './routes/interviews'
 import { Route as ContactsRouteImport } from './routes/contacts'
@@ -44,6 +45,11 @@ const ReportsRoute = ReportsRouteImport.update({
 const PlacementsRoute = PlacementsRouteImport.update({
   id: '/placements',
   path: '/placements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobsRoute = JobsRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/contacts': typeof ContactsRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
+  '/login': typeof LoginRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/contacts': typeof ContactsRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
+  '/login': typeof LoginRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/contacts': typeof ContactsRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
+  '/login': typeof LoginRoute
   '/placements': typeof PlacementsRoute
   '/reports': typeof ReportsRoute
   '/settings': typeof SettingsRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/interviews'
     | '/jobs'
+    | '/login'
     | '/placements'
     | '/reports'
     | '/settings'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/interviews'
     | '/jobs'
+    | '/login'
     | '/placements'
     | '/reports'
     | '/settings'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/contacts'
     | '/interviews'
     | '/jobs'
+    | '/login'
     | '/placements'
     | '/reports'
     | '/settings'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   ContactsRoute: typeof ContactsRoute
   InterviewsRoute: typeof InterviewsRoute
   JobsRoute: typeof JobsRoute
+  LoginRoute: typeof LoginRoute
   PlacementsRoute: typeof PlacementsRoute
   ReportsRoute: typeof ReportsRoute
   SettingsRoute: typeof SettingsRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/placements'
       fullPath: '/placements'
       preLoaderRoute: typeof PlacementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/jobs': {
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactsRoute: ContactsRoute,
   InterviewsRoute: InterviewsRoute,
   JobsRoute: JobsRoute,
+  LoginRoute: LoginRoute,
   PlacementsRoute: PlacementsRoute,
   ReportsRoute: ReportsRoute,
   SettingsRoute: SettingsRoute,

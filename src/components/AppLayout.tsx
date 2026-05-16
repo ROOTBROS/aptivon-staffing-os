@@ -1,5 +1,10 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { seedSampleData } from "@/lib/seed";
+import { toast } from "sonner";
 import {
   LayoutDashboard,
   Building2,
@@ -17,6 +22,8 @@ import {
   Bell,
   Menu,
   X,
+  LogOut,
+  Sparkles,
 } from "lucide-react";
 import logo from "@/assets/aptivon-logo.png";
 import { cn } from "@/lib/utils";
@@ -95,6 +102,7 @@ export function AppLayout() {
 }
 
 function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNavigate?: () => void }) {
+  const { profile, user, signOut } = useAuth();
   return (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
@@ -130,12 +138,21 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
       <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground">
-            JR
+            {profile?.initials || (user?.email?.[0] ?? "U").toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">Jordan Reyes</div>
-            <div className="truncate text-xs text-sidebar-foreground/60">Senior Recruiter</div>
+            <div className="truncate text-sm font-medium">{profile?.full_name || user?.email}</div>
+            <div className="truncate text-xs text-sidebar-foreground/60">{profile?.role_label || "Member"}</div>
           </div>
+          <button
+            type="button"
+            onClick={() => signOut()}
+            className="ml-auto rounded-md p-1.5 text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </>
@@ -143,6 +160,28 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
 }
 
 function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const [seeding, setSeeding] = useState(false);
+
+  async function handleSeed() {
+    if (!user) return;
+    setSeeding(true);
+    try {
+      const res = await seedSampleData(user.id);
+      if (res.skipped) {
+        toast.message("Sample data already loaded");
+      } else {
+        toast.success("Sample data loaded");
+        qc.invalidateQueries();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to seed");
+    } finally {
+      setSeeding(false);
+    }
+  }
+
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur sm:px-6 lg:px-8">
       <button
@@ -161,6 +200,16 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
           className="h-10 w-full max-w-xl rounded-md border border-input bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30"
         />
       </div>
+      <button
+        type="button"
+        onClick={handleSeed}
+        disabled={seeding}
+        className="hidden h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-60 sm:inline-flex"
+        title="Load sample staffing data into your workspace"
+      >
+        <Sparkles className="h-4 w-4" />
+        {seeding ? "Seeding…" : "Load sample data"}
+      </button>
       <button
         type="button"
         className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground shadow-sm hover:opacity-90"
