@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as CompaniesRouteImport } from './routes/companies'
 import { Route as CandidatesRouteImport } from './routes/candidates'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SubmissionsRoute = SubmissionsRouteImport.update({
+  id: '/submissions',
+  path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JobsRoute = JobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
   '/jobs': typeof JobsRoute
+  '/submissions': typeof SubmissionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
   '/jobs': typeof JobsRoute
+  '/submissions': typeof SubmissionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
   '/jobs': typeof JobsRoute
+  '/submissions': typeof SubmissionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/candidates' | '/companies' | '/contacts' | '/jobs'
+  fullPaths:
+    | '/'
+    | '/candidates'
+    | '/companies'
+    | '/contacts'
+    | '/jobs'
+    | '/submissions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/candidates' | '/companies' | '/contacts' | '/jobs'
-  id: '__root__' | '/' | '/candidates' | '/companies' | '/contacts' | '/jobs'
+  to:
+    | '/'
+    | '/candidates'
+    | '/companies'
+    | '/contacts'
+    | '/jobs'
+    | '/submissions'
+  id:
+    | '__root__'
+    | '/'
+    | '/candidates'
+    | '/companies'
+    | '/contacts'
+    | '/jobs'
+    | '/submissions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,10 +105,18 @@ export interface RootRouteChildren {
   CompaniesRoute: typeof CompaniesRoute
   ContactsRoute: typeof ContactsRoute
   JobsRoute: typeof JobsRoute
+  SubmissionsRoute: typeof SubmissionsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/submissions': {
+      id: '/submissions'
+      path: '/submissions'
+      fullPath: '/submissions'
+      preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jobs': {
       id: '/jobs'
       path: '/jobs'
@@ -125,7 +161,18 @@ const rootRouteChildren: RootRouteChildren = {
   CompaniesRoute: CompaniesRoute,
   ContactsRoute: ContactsRoute,
   JobsRoute: JobsRoute,
+  SubmissionsRoute: SubmissionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
