@@ -4,6 +4,7 @@ import { Card, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useContacts, type ContactRow } from "@/lib/queries";
+import { useCreate } from "@/components/CreateDialog";
 
 export const Route = createFileRoute("/contacts")({ component: Contacts });
 
@@ -41,13 +42,14 @@ const columns: Column<ContactRow>[] = [
 
 function Contacts() {
   const { data = [], isLoading } = useContacts();
+  const { open } = useCreate();
   return (
     <div>
       <PageHeader
         title="Contacts"
         subtitle="Hiring managers and client stakeholders."
         actions={
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
+          <button onClick={() => open("contact")} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
             <Plus className="h-4 w-4" /> New contact
           </button>
         }

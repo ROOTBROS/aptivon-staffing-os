@@ -4,6 +4,7 @@ import { Card, CardHeader, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useJobs, type JobRow } from "@/lib/queries";
+import { useCreate } from "@/components/CreateDialog";
 
 export const Route = createFileRoute("/jobs")({ component: Jobs });
 
@@ -61,6 +62,7 @@ const stages = ["Open", "Sourcing", "Interviewing", "Offer", "Placed", "Closed"]
 
 function Jobs() {
   const { data = [], isLoading } = useJobs();
+  const { open } = useCreate();
   const counts = stages.map((s) => data.filter((j) => j.status === s).length);
   return (
     <div>
@@ -68,7 +70,7 @@ function Jobs() {
         title="Jobs"
         subtitle="Active job orders and pipelines."
         actions={
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
+          <button onClick={() => open("job")} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
             <Plus className="h-4 w-4" /> New job order
           </button>
         }

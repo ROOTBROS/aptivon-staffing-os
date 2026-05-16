@@ -4,6 +4,7 @@ import { Card, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useCompanies, type CompanyRow } from "@/lib/queries";
+import { useCreate } from "@/components/CreateDialog";
 
 export const Route = createFileRoute("/companies")({ component: Companies });
 
@@ -32,13 +33,14 @@ const columns: Column<CompanyRow>[] = [
 
 function Companies() {
   const { data = [], isLoading } = useCompanies();
+  const { open } = useCreate();
   return (
     <div>
       <PageHeader
         title="Companies"
         subtitle="Clients, prospects, and target accounts."
         actions={
-          <button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
+          <button onClick={() => open("company")} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90">
             <Plus className="h-4 w-4" /> New company
           </button>
         }
