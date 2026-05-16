@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
+import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PlacementsRouteImport } from './routes/placements'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewsRouteImport } from './routes/interviews'
@@ -27,6 +28,11 @@ const TasksRoute = TasksRouteImport.update({
 const SubmissionsRoute = SubmissionsRouteImport.update({
   id: '/submissions',
   path: '/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlacementsRoute = PlacementsRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
+  '/reports': typeof ReportsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
+  '/reports': typeof ReportsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
+  '/reports': typeof ReportsRoute
   '/submissions': typeof SubmissionsRoute
   '/tasks': typeof TasksRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/interviews'
     | '/jobs'
     | '/placements'
+    | '/reports'
     | '/submissions'
     | '/tasks'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/interviews'
     | '/jobs'
     | '/placements'
+    | '/reports'
     | '/submissions'
     | '/tasks'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/interviews'
     | '/jobs'
     | '/placements'
+    | '/reports'
     | '/submissions'
     | '/tasks'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   InterviewsRoute: typeof InterviewsRoute
   JobsRoute: typeof JobsRoute
   PlacementsRoute: typeof PlacementsRoute
+  ReportsRoute: typeof ReportsRoute
   SubmissionsRoute: typeof SubmissionsRoute
   TasksRoute: typeof TasksRoute
 }
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/submissions'
       fullPath: '/submissions'
       preLoaderRoute: typeof SubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/placements': {
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   InterviewsRoute: InterviewsRoute,
   JobsRoute: JobsRoute,
   PlacementsRoute: PlacementsRoute,
+  ReportsRoute: ReportsRoute,
   SubmissionsRoute: SubmissionsRoute,
   TasksRoute: TasksRoute,
 }
