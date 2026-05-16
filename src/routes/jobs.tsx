@@ -3,11 +3,9 @@ import { Plus, MapPin, Users } from "lucide-react";
 import { Card, CardHeader, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
-import { jobs } from "@/lib/sample-data";
+import { useJobs, type JobRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/jobs")({ component: Jobs });
-
-type J = (typeof jobs)[number];
 
 function Pill({ label, value }: { label: string; value: number }) {
   return (
@@ -18,7 +16,7 @@ function Pill({ label, value }: { label: string; value: number }) {
   );
 }
 
-const columns: Column<J>[] = [
+const columns: Column<JobRow>[] = [
   {
     key: "title",
     header: "Job",
@@ -26,9 +24,9 @@ const columns: Column<J>[] = [
       <div>
         <div className="font-medium text-foreground">{j.title}</div>
         <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{j.company}</span>
+          <span>{j.company_name}</span>
           <span>•</span>
-          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {j.location}</span>
+          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {j.location ?? "—"}</span>
         </div>
       </div>
     ),
@@ -51,18 +49,19 @@ const columns: Column<J>[] = [
   )},
   { key: "rate", header: "Pay / Bill", render: (j) => (
     <div className="text-xs">
-      <div className="text-foreground">{j.payRate}</div>
-      <div className="text-muted-foreground">{j.billRate}</div>
+      <div className="text-foreground">{j.pay_rate ?? "—"}</div>
+      <div className="text-muted-foreground">{j.bill_rate ?? "—"}</div>
     </div>
   )},
-  { key: "owner", header: "Recruiter", render: (j) => <span className="text-muted-foreground">{j.recruiter}</span> },
+  { key: "owner", header: "Recruiter", render: (j) => <span className="text-muted-foreground">{j.recruiter_name}</span> },
   { key: "age", header: "Age", render: (j) => <span className="text-muted-foreground">{j.age}d</span> },
 ];
 
-const stages = ["Sourced", "Screened", "Submitted", "Interview", "Offer", "Placed"];
-const counts = [42, 28, 19, 11, 4, 6];
+const stages = ["Open", "Sourcing", "Interviewing", "Offer", "Placed", "Closed"] as const;
 
 function Jobs() {
+  const { data = [], isLoading } = useJobs();
+  const counts = stages.map((s) => data.filter((j) => j.status === s).length);
   return (
     <div>
       <PageHeader
@@ -91,9 +90,9 @@ function Jobs() {
           <FilterChip>All priorities</FilterChip>
           <FilterChip>All owners</FilterChip>
           <FilterChip>All clients</FilterChip>
-          <div className="ml-auto text-xs text-muted-foreground">{jobs.length} jobs</div>
+          <div className="ml-auto text-xs text-muted-foreground">{isLoading ? "Loading…" : `${data.length} jobs`}</div>
         </Toolbar>
-        <DataTable columns={columns} rows={jobs} />
+        <DataTable columns={columns} rows={data} />
       </Card>
     </div>
   );

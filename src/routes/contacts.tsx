@@ -3,13 +3,11 @@ import { Plus, Mail, Phone } from "lucide-react";
 import { Card, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
-import { contacts } from "@/lib/sample-data";
+import { useContacts, type ContactRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/contacts")({ component: Contacts });
 
-type Ct = (typeof contacts)[number];
-
-const columns: Column<Ct>[] = [
+const columns: Column<ContactRow>[] = [
   {
     key: "name",
     header: "Name",
@@ -20,28 +18,29 @@ const columns: Column<Ct>[] = [
         </div>
         <div>
           <div className="font-medium text-foreground">{c.name}</div>
-          <div className="text-xs text-muted-foreground">{c.title}</div>
+          <div className="text-xs text-muted-foreground">{c.title ?? "—"}</div>
         </div>
       </div>
     ),
   },
-  { key: "company", header: "Company", render: (c) => <span className="text-foreground">{c.company}</span> },
-  { key: "role", header: "Role", render: (c) => <StatusBadge value={c.role} /> },
+  { key: "company", header: "Company", render: (c) => <span className="text-foreground">{c.company_name}</span> },
+  { key: "role", header: "Role", render: (c) => <StatusBadge value={c.role ?? "—"} /> },
   {
     key: "contact",
     header: "Contact",
     render: (c) => (
       <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
-        <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" /> {c.email}</span>
-        <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {c.phone}</span>
+        <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" /> {c.email ?? "—"}</span>
+        <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" /> {c.phone ?? "—"}</span>
       </div>
     ),
   },
   { key: "status", header: "Status", render: (c) => <StatusBadge value={c.status} /> },
-  { key: "owner", header: "Owner", render: (c) => <span className="text-muted-foreground">{c.owner}</span> },
+  { key: "owner", header: "Owner", render: (c) => <span className="text-muted-foreground">{c.owner_name}</span> },
 ];
 
 function Contacts() {
+  const { data = [], isLoading } = useContacts();
   return (
     <div>
       <PageHeader
@@ -58,9 +57,9 @@ function Contacts() {
           <FilterChip>All companies</FilterChip>
           <FilterChip>Decision makers</FilterChip>
           <FilterChip>All owners</FilterChip>
-          <div className="ml-auto text-xs text-muted-foreground">{contacts.length} contacts</div>
+          <div className="ml-auto text-xs text-muted-foreground">{isLoading ? "Loading…" : `${data.length} contacts`}</div>
         </Toolbar>
-        <DataTable columns={columns} rows={contacts} />
+        <DataTable columns={columns} rows={data} />
       </Card>
     </div>
   );

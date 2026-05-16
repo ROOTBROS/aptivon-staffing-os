@@ -3,13 +3,11 @@ import { Plus, MapPin } from "lucide-react";
 import { Card, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
-import { candidates } from "@/lib/sample-data";
+import { useCandidates, dateUtils, type CandidateRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/candidates")({ component: Candidates });
 
-type K = (typeof candidates)[number];
-
-const columns: Column<K>[] = [
+const columns: Column<CandidateRow>[] = [
   {
     key: "name",
     header: "Candidate",
@@ -21,9 +19,9 @@ const columns: Column<K>[] = [
         <div>
           <div className="font-medium text-foreground">{k.name}</div>
           <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{k.title}</span>
+            <span>{k.title ?? "—"}</span>
             <span>•</span>
-            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {k.location}</span>
+            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {k.location ?? "—"}</span>
           </div>
         </div>
       </div>
@@ -41,14 +39,15 @@ const columns: Column<K>[] = [
       </div>
     ),
   },
-  { key: "yr", header: "Yrs", render: (k) => <span className="text-foreground">{k.years}</span> },
-  { key: "avail", header: "Available", render: (k) => <span className="text-muted-foreground">{k.availability}</span> },
-  { key: "pay", header: "Desired", render: (k) => <span className="text-foreground">{k.desiredPay}</span> },
-  { key: "src", header: "Source", render: (k) => <span className="text-muted-foreground">{k.source}</span> },
-  { key: "owner", header: "Owner", render: (k) => <span className="text-muted-foreground">{k.owner}</span> },
+  { key: "yr", header: "Yrs", render: (k) => <span className="text-foreground">{k.years ?? "—"}</span> },
+  { key: "avail", header: "Available", render: (k) => <span className="text-muted-foreground">{k.availability ?? "—"}</span> },
+  { key: "pay", header: "Desired", render: (k) => <span className="text-foreground">{k.desired_pay ?? "—"}</span> },
+  { key: "src", header: "Source", render: (k) => <span className="text-muted-foreground">{k.source ?? "—"}</span> },
+  { key: "owner", header: "Owner", render: (k) => <span className="text-muted-foreground">{k.owner_name}</span> },
 ];
 
 function Candidates() {
+  const { data = [], isLoading } = useCandidates();
   return (
     <div>
       <PageHeader
@@ -67,9 +66,9 @@ function Candidates() {
           <FilterChip>Skills</FilterChip>
           <FilterChip>Location</FilterChip>
           <FilterChip>Owners</FilterChip>
-          <div className="ml-auto text-xs text-muted-foreground">{candidates.length} candidates</div>
+          <div className="ml-auto text-xs text-muted-foreground">{isLoading ? "Loading…" : `${data.length} candidates`}</div>
         </Toolbar>
-        <DataTable columns={columns} rows={candidates} />
+        <DataTable columns={columns} rows={data} />
       </Card>
     </div>
   );
