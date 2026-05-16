@@ -1,14 +1,12 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useQueryClient } from "@tanstack/react-query";
-import { seedSampleData } from "@/lib/seed";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import { CreateProvider, useCreate, type EntityKind } from "@/components/CreateDialog";
 import {
   LayoutDashboard, Building2, Users, Briefcase, UserSearch, Send,
   CalendarClock, Trophy, CheckSquare, BarChart3, Settings,
-  Search, Plus, Bell, Menu, LogOut, Sparkles,
+  Search, Plus, Bell, Menu, LogOut,
 } from "lucide-react";
 import logo from "@/assets/aptivon-logo.png";
 import { cn } from "@/lib/utils";
@@ -124,23 +122,8 @@ const QUICK_ITEMS: { kind: EntityKind; label: string }[] = [
 ];
 
 function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
-  const { user } = useAuth();
-  const qc = useQueryClient();
   const { open } = useCreate();
-  const [seeding, setSeeding] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  async function handleSeed() {
-    if (!user) return;
-    setSeeding(true);
-    try {
-      const res = await seedSampleData(user.id);
-      if (res.skipped) toast.message("Sample data already loaded");
-      else { toast.success("Sample data loaded"); qc.invalidateQueries(); }
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to seed");
-    } finally { setSeeding(false); }
-  }
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur sm:px-6 lg:px-8">
@@ -151,12 +134,6 @@ function TopBar({ onMenuClick }: { onMenuClick: () => void }) {
         <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
         <input type="search" placeholder="Search candidates, companies, jobs…" className="h-10 w-full max-w-xl rounded-md border border-input bg-card pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/30" />
       </div>
-      <button type="button" onClick={handleSeed} disabled={seeding}
-        className="hidden h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-60 sm:inline-flex"
-        title="Load sample staffing data into your workspace">
-        <Sparkles className="h-4 w-4" />
-        {seeding ? "Seeding…" : "Load sample data"}
-      </button>
       <div className="relative">
         <button type="button" onClick={() => setMenuOpen((o) => !o)} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground shadow-sm hover:opacity-90">
           <Plus className="h-4 w-4" /><span className="hidden sm:inline">Quick create</span>
