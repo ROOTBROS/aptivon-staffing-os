@@ -88,7 +88,7 @@ function Landing() {
           {FEATURES.map((f) => (
             <div key={f.label} className="rounded-xl border border-border bg-card p-5">
               <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-md bg-accent/10 text-accent">
-                <f.icon className="h-4.5 w-4.5" />
+                <f.icon className="h-5 w-5" />
               </div>
               <div className="text-sm font-semibold text-foreground">{f.label}</div>
               <div className="mt-1 text-sm text-muted-foreground">{f.desc}</div>
