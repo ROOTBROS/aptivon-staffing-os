@@ -166,6 +166,30 @@ export function useProfiles() {
   });
 }
 
+export type TeamMember = Profile & { role: "admin" | "manager" | "recruiter" | null };
+
+export function useTeamMembers() {
+  return useQuery({
+    queryKey: ["team-members"],
+    queryFn: async (): Promise<TeamMember[]> => {
+      const [{ data: profiles, error }, { data: roles }] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, initials, role_label").order("full_name"),
+        supabase.from("user_roles").select("user_id, role"),
+      ]);
+      if (error) throw error;
+      const roleMap: Record<string, TeamMember["role"]> = {};
+      (roles ?? []).forEach((r) => {
+        const cur = roleMap[r.user_id];
+        const incoming = r.role as TeamMember["role"];
+        // admin > manager > recruiter
+        const rank = (x: TeamMember["role"]) => (x === "admin" ? 3 : x === "manager" ? 2 : x === "recruiter" ? 1 : 0);
+        if (!cur || rank(incoming) > rank(cur)) roleMap[r.user_id] = incoming;
+      });
+      return (profiles ?? []).map((p) => ({ ...p, role: roleMap[p.id] ?? null }));
+    },
+  });
+}
+
 export function useCompanies() {
   return useQuery({
     queryKey: ["companies"],
