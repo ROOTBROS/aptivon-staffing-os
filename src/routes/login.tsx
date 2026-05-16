@@ -52,7 +52,7 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 flex items-center justify-center gap-2">
-          <img src={logo} alt="Aptivon" className="h-9 w-auto" />
+          <img src={logo} alt="Aptivon" className="h-20 w-auto" />
         </div>
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h1 className="text-xl font-semibold text-foreground">

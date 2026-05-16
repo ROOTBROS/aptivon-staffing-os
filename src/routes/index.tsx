@@ -26,7 +26,7 @@ function Landing() {
       <BackgroundFx />
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="Aptivon" className="h-9 w-auto" />
+          <img src={logo} alt="Aptivon" className="h-20 w-auto" />
         </div>
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#features" className="hover:text-foreground">Features</a>
@@ -34,7 +34,7 @@ function Landing() {
           <a href="#open-source" className="hover:text-foreground">Open source</a>
         </nav>
         <a
-          href="https://github.com"
+          href="https://github.com/ROOTBROS/aptivon-staffing-os"
           target="_blank"
           rel="noreferrer"
           className="inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground hover:bg-muted"
@@ -120,7 +120,7 @@ function Landing() {
               </p>
             </div>
             <a
-              href="https://github.com"
+              href="https://github.com/ROOTBROS/aptivon-staffing-os"
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-11 items-center gap-2 rounded-md bg-white px-5 text-sm font-semibold text-[oklch(0.22_0.07_255)] hover:bg-white/90"
