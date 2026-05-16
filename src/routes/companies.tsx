@@ -1,16 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Filter, Building2 } from "lucide-react";
-import { Card } from "@/components/PageHeader";
-import { PageHeader } from "@/components/PageHeader";
+import { Card, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
-import { companies } from "@/lib/sample-data";
+import { useCompanies, type CompanyRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/companies")({ component: Companies });
 
-type Co = (typeof companies)[number];
-
-const columns: Column<Co>[] = [
+const columns: Column<CompanyRow>[] = [
   {
     key: "name",
     header: "Company",
@@ -21,20 +18,20 @@ const columns: Column<Co>[] = [
         </div>
         <div>
           <div className="font-medium text-foreground">{c.name}</div>
-          <div className="text-xs text-muted-foreground">{c.industry} • {c.location}</div>
+          <div className="text-xs text-muted-foreground">{c.industry ?? "—"} • {c.location ?? "—"}</div>
         </div>
       </div>
     ),
   },
   { key: "status", header: "Status", render: (c) => <StatusBadge value={c.status} /> },
-  { key: "tier", header: "Tier", render: (c) => <span className="text-foreground">{c.tier}</span> },
-  { key: "jobs", header: "Active jobs", render: (c) => <span className="font-medium text-foreground">{c.activeJobs}</span> },
-  { key: "subs", header: "Open subs", render: (c) => <span>{c.openSubs}</span> },
-  { key: "owner", header: "Owner", render: (c) => <span className="text-muted-foreground">{c.owner}</span> },
-  { key: "last", header: "Last contact", render: (c) => <span className="text-muted-foreground">{c.lastContact}</span> },
+  { key: "tier", header: "Tier", render: (c) => <span className="text-foreground">{c.tier ?? "—"}</span> },
+  { key: "jobs", header: "Active jobs", render: (c) => <span className="font-medium text-foreground">{c.active_jobs}</span> },
+  { key: "subs", header: "Open subs", render: (c) => <span>{c.open_subs}</span> },
+  { key: "owner", header: "Owner", render: (c) => <span className="text-muted-foreground">{c.owner_name}</span> },
 ];
 
 function Companies() {
+  const { data = [], isLoading } = useCompanies();
   return (
     <div>
       <PageHeader
@@ -51,9 +48,9 @@ function Companies() {
           <FilterChip><Filter className="h-3.5 w-3.5" /> All statuses</FilterChip>
           <FilterChip>All owners</FilterChip>
           <FilterChip>All industries</FilterChip>
-          <div className="ml-auto text-xs text-muted-foreground">{companies.length} companies</div>
+          <div className="ml-auto text-xs text-muted-foreground">{isLoading ? "Loading…" : `${data.length} companies`}</div>
         </Toolbar>
-        <DataTable columns={columns} rows={companies} />
+        <DataTable columns={columns} rows={data} />
       </Card>
     </div>
   );

@@ -3,24 +3,25 @@ import { Plus } from "lucide-react";
 import { Card, CardHeader, PageHeader } from "@/components/PageHeader";
 import { Column, DataTable, FilterChip, Toolbar } from "@/components/DataTable";
 import { StatusBadge } from "@/components/StatusBadge";
-import { submissions } from "@/lib/sample-data";
+import { useSubmissions, dateUtils, type SubmissionRow } from "@/lib/queries";
 
 export const Route = createFileRoute("/submissions")({ component: Submissions });
-type S = (typeof submissions)[number];
 
-const columns: Column<S>[] = [
-  { key: "candidate", header: "Candidate", render: (s) => <span className="font-medium text-foreground">{s.candidate}</span> },
-  { key: "job", header: "Job", render: (s) => (<div><div className="text-foreground">{s.job}</div><div className="text-xs text-muted-foreground">{s.company}</div></div>) },
-  { key: "rate", header: "Rate", render: (s) => <span>{s.rate || "—"}</span> },
-  { key: "by", header: "Submitted by", render: (s) => <span className="text-muted-foreground">{s.submittedBy}</span> },
-  { key: "date", header: "Date", render: (s) => <span className="text-muted-foreground">{s.submittedAt}</span> },
+const columns: Column<SubmissionRow>[] = [
+  { key: "candidate", header: "Candidate", render: (s) => <span className="font-medium text-foreground">{s.candidate_name}</span> },
+  { key: "job", header: "Job", render: (s) => (<div><div className="text-foreground">{s.job_title}</div><div className="text-xs text-muted-foreground">{s.company_name}</div></div>) },
+  { key: "rate", header: "Rate", render: (s) => <span>{s.rate ?? "—"}</span> },
+  { key: "by", header: "Submitted by", render: (s) => <span className="text-muted-foreground">{s.submitted_by_name}</span> },
+  { key: "date", header: "Date", render: (s) => <span className="text-muted-foreground">{dateUtils.fmtDate(s.submitted_at)}</span> },
   { key: "status", header: "Status", render: (s) => <StatusBadge value={s.status} /> },
-  { key: "fb", header: "Feedback", render: (s) => <span className="line-clamp-1 text-xs text-muted-foreground">{s.feedback || "—"}</span> },
+  { key: "fb", header: "Feedback", render: (s) => <span className="line-clamp-1 text-xs text-muted-foreground">{s.feedback ?? "—"}</span> },
 ];
 
-const funnel = [["Draft",4],["Submitted",18],["Client reviewed",11],["Interview requested",7],["Offer pending",3],["Placed",6]] as const;
+const funnelStages = ["Draft", "Submitted", "Client reviewed", "Interview requested", "Offer pending", "Placed"] as const;
 
 function Submissions() {
+  const { data = [], isLoading } = useSubmissions();
+  const funnel = funnelStages.map((s) => [s, data.filter((r) => r.status === s).length] as const);
   return (
     <div>
       <PageHeader title="Submissions" subtitle="Every candidate presented to a client." actions={<button className="inline-flex h-9 items-center gap-1.5 rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground hover:opacity-90"><Plus className="h-4 w-4" /> New submission</button>} />
@@ -31,8 +32,8 @@ function Submissions() {
         </div>
       </Card>
       <Card>
-        <Toolbar><FilterChip>All statuses</FilterChip><FilterChip>All clients</FilterChip><FilterChip>All recruiters</FilterChip><div className="ml-auto text-xs text-muted-foreground">{submissions.length} submissions</div></Toolbar>
-        <DataTable columns={columns} rows={submissions} />
+        <Toolbar><FilterChip>All statuses</FilterChip><FilterChip>All clients</FilterChip><FilterChip>All recruiters</FilterChip><div className="ml-auto text-xs text-muted-foreground">{isLoading ? "Loading…" : `${data.length} submissions`}</div></Toolbar>
+        <DataTable columns={columns} rows={data} />
       </Card>
     </div>
   );
