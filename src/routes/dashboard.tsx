@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCreate } from "@/components/CreateDialog";
 import { useDashboardKpis, useTasks, useInterviews, useJobs, useSubmissions, useActivities, dateUtils } from "@/lib/queries";
 
-export const Route = createFileRoute("/")({ component: Dashboard });
+export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
 const TONE: Record<string, string> = {
   info: "bg-[oklch(0.96_0.04_240)] text-[oklch(0.32_0.12_245)]",
