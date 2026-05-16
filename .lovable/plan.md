@@ -1,54 +1,63 @@
+## Current state
+
+The schema already has a 3-tier role hierarchy via `public.app_role` enum (`admin`, `manager`, `recruiter`) and a separate `user_roles` table checked by the `has_role()` security-definer function. RLS already uses it: any authenticated user can read; only the row's creator OR an `admin` can update/delete.
+
+What's missing is purely UX: there's no way to see or change roles from inside the app, and the very first signup has no path to admin without dropping into SQL.
+
 ## Goal
 
-Make Aptivon ready for real users to set up against their own Supabase project, with the database schema committed to the repo and clear README setup instructions. Remove all sample/seed data paths.
+Make the role hierarchy usable end-to-end without any SQL knowledge. Keep it dead simple: **two effective tiers** in the UI — Admin and Recruiter. (The `manager` enum value stays in the schema for future use but isn't surfaced now.)
+
+Rules:
+- **Admin** — can edit/delete anything anyone created; can promote/demote other users.
+- **Recruiter** — default for new signups; can create anything, can only edit/delete their own records.
+- **First signup auto-becomes Admin** so a brand-new workspace has an owner without needing SQL.
 
 ## Changes
 
-### 1. Remove sample data entirely
-- Delete `src/lib/sample-data.ts`
-- Delete `src/lib/seed.ts`
-- Remove the "Load sample data" button and its handler from `src/components/AppLayout.tsx`
-- Verify no other imports reference these files (search confirms only `AppLayout.tsx` and `seed.ts` use them)
+### 1. Schema (one small migration)
 
-### 2. Commit schema to repo
-Migrations already exist under `supabase/migrations/` (two files). Add a consolidated, human-readable schema dump at `supabase/schema.sql` containing:
-- `app_role` enum + `user_roles` table + `has_role()` function
-- All 11 tables (profiles, companies, contacts, jobs, candidates, submissions, interviews, placements, tasks, activities)
-- RLS enablement + policies for each table
-- `set_updated_at()` trigger function and per-table triggers
-- `handle_new_user()` trigger on `auth.users` to auto-create profile + default role
+Update `handle_new_user()` so that:
+- If there are zero rows in `user_roles` with role `'admin'`, the new user gets `admin` and their `profiles.role_label` is set to `'Admin'`.
+- Otherwise, behavior stays the same (`recruiter` + `'Recruiter'`).
 
-This single file lets a new user run it in the Supabase SQL editor in one shot, instead of stitching together two timestamped migrations.
+Add an RPC `set_user_role(target_user uuid, new_role app_role)`:
+- `SECURITY DEFINER`, callable by authenticated users.
+- Body checks `has_role(auth.uid(), 'admin')`; if not, raises.
+- Prevents an admin from demoting the last remaining admin.
+- Replaces the target's row in `user_roles` and updates `profiles.role_label` to match.
 
-### 3. README setup instructions
-Rewrite `README.md` with:
-- **What Aptivon is** (1 short paragraph)
-- **Prerequisites**: Node/Bun, a Supabase project
-- **Step-by-step setup**:
-  1. Clone repo, `bun install`
-  2. Create a Supabase project at supabase.com
-  3. Run `supabase/schema.sql` in the SQL Editor (creates tables, RLS, triggers, roles)
-  4. Copy Project URL + publishable (anon) key from Supabase → Settings → API
-  5. Create `.env` from `.env.example` with `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`, plus server-side `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-  6. In Supabase Auth settings, enable Email provider (and optionally disable email confirmation for fast testing, or keep on for production)
-  7. `bun run dev`
-  8. Sign up — first user becomes a recruiter; promote yourself to admin by inserting into `user_roles` via SQL editor (snippet provided)
-- **First-time use**: create your first company → contact → job → candidate → submission flow
-- **Deploying**: short note pointing to TanStack Start / Cloudflare Worker deploy
-- **Tech stack** summary
+Mirror these changes in `supabase/schema.sql` so a fresh setup gets the new behavior.
 
-Add `.env.example` with the variable names (no values).
+### 2. Auth context
 
-### 4. Verify production readiness
-- Confirm Quick Create dialogs still work without seed data
-- Confirm empty states render cleanly on each list page (Jobs, Candidates, etc.) since a fresh user will see zero rows
+Extend `src/hooks/use-auth.tsx`:
+- After loading the profile, also fetch `user_roles` for the current user.
+- Expose `role: 'admin' | 'recruiter' | null` and `isAdmin: boolean` on the `useAuth()` context.
+
+### 3. Settings page — team management
+
+Update `src/routes/settings.tsx` "Team members" card:
+- Join `profiles` with `user_roles` to show each member's actual role (Admin / Recruiter), not just the cosmetic `role_label`.
+- If the current user `isAdmin`, render a small role dropdown next to each other member that calls the `set_user_role` RPC and refreshes the list on success.
+- Non-admins see the role as a read-only badge.
+- Show a toast on success/failure (sonner is already mounted).
+
+### 4. Tiny visual cue
+
+In `AppLayout`'s sidebar footer, when `isAdmin` is true show a small "Admin" pill next to the user's name. No new gated routes — admin power is enforced by RLS at the row level, which is enough for v1.
+
+### 5. README
+
+Two-line update under "Promote yourself to admin": replace the SQL snippet with "The very first signup is automatically the workspace admin. After that, admins can promote teammates from Settings → Team members." Keep the SQL as a fallback note.
 
 ## Files
 
-**Delete**: `src/lib/sample-data.ts`, `src/lib/seed.ts`
-**Edit**: `src/components/AppLayout.tsx`, `README.md`
-**Create**: `supabase/schema.sql`, `.env.example`
+**Edit**: `src/hooks/use-auth.tsx`, `src/routes/settings.tsx`, `src/components/AppLayout.tsx`, `supabase/schema.sql`, `README.md`
+**New migration**: updated `handle_new_user()` + new `set_user_role()` RPC
 
 ## Out of scope
-- No new features, no UI redesign, no auth provider changes
-- Email confirmation policy stays whatever it currently is (documented in README)
+
+- No `manager` tier in the UI yet (kept in schema for later).
+- No new route guards (RLS handles enforcement; every authenticated user can still navigate everywhere — destructive actions just fail server-side for non-owners/non-admins, which is the existing behavior).
+- No per-record permission badges in list pages.

@@ -64,9 +64,14 @@ bun run dev
 
 Open <http://localhost:3000>, click **Sign up**, and you're in.
 
-### 7. (Optional) Promote yourself to admin
+### 7. Roles
 
-New users are created with the `recruiter` role. To make yourself an admin (can edit and delete records created by anyone), run this once in the Supabase SQL Editor:
+The very first person to sign up automatically becomes the workspace **Admin**. Everyone after that defaults to **Recruiter**. Admins can promote or demote teammates from **Settings → Team members**.
+
+- **Admin** — can edit and delete anything anyone created, and manage roles.
+- **Recruiter** — can create anything, can only edit or delete their own records.
+
+If you ever need to promote someone via SQL (escape hatch):
 
 ```sql
 INSERT INTO public.user_roles (user_id, role)

@@ -72,7 +72,7 @@ export function AppLayout() {
 }
 
 function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNavigate?: () => void }) {
-  const { profile, user, signOut } = useAuth();
+  const { profile, user, signOut, isAdmin } = useAuth();
   return (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
@@ -98,7 +98,14 @@ function SidebarContent({ currentPath, onNavigate }: { currentPath: string; onNa
             {profile?.initials || (user?.email?.[0] ?? "U").toUpperCase()}
           </div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{profile?.full_name || user?.email}</div>
+            <div className="flex items-center gap-1.5">
+              <div className="truncate text-sm font-medium">{profile?.full_name || user?.email}</div>
+              {isAdmin && (
+                <span className="rounded bg-accent/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                  Admin
+                </span>
+              )}
+            </div>
             <div className="truncate text-xs text-sidebar-foreground/60">{profile?.role_label || "Member"}</div>
           </div>
           <button type="button" onClick={() => signOut()} className="ml-auto rounded-md p-1.5 text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground" aria-label="Sign out" title="Sign out">
