@@ -79,10 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Aptivon is a staffing-native ATS and CRM that helps recruiters move from client demand to placement faster." },
       { name: "author", content: "Aptivon" },
       { property: "og:title", content: "Aptivon — Staffing ATS + CRM" },
-      { property: "og:description", content: "A modern operating system for staffing teams." },
+      { property: "og:description", content: "Aptivon is a staffing-native ATS and CRM that helps recruiters move from client demand to placement faster." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Aptivon — Staffing ATS + CRM" },
+      { name: "twitter:description", content: "Aptivon is a staffing-native ATS and CRM that helps recruiters move from client demand to placement faster." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ea7b6f7-d123-4f06-ab56-65be31949ff8/id-preview-a3c8f457--063e3efc-4e57-4102-859f-5ea3661c69ca.lovable.app-1778974509379.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0ea7b6f7-d123-4f06-ab56-65be31949ff8/id-preview-a3c8f457--063e3efc-4e57-4102-859f-5ea3661c69ca.lovable.app-1778974509379.png" },
     ],
     links: [
       {
