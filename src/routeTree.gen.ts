@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SubmissionsRouteImport } from './routes/submissions'
 import { Route as PlacementsRouteImport } from './routes/placements'
 import { Route as JobsRouteImport } from './routes/jobs'
@@ -18,6 +19,11 @@ import { Route as CompaniesRouteImport } from './routes/companies'
 import { Route as CandidatesRouteImport } from './routes/candidates'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TasksRoute = TasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmissionsRoute = SubmissionsRouteImport.update({
   id: '/submissions',
   path: '/submissions',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/submissions': typeof SubmissionsRoute
+  '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/submissions': typeof SubmissionsRoute
+  '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/placements': typeof PlacementsRoute
   '/submissions': typeof SubmissionsRoute
+  '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/submissions'
+    | '/tasks'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/submissions'
+    | '/tasks'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/placements'
     | '/submissions'
+    | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,10 +144,18 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   PlacementsRoute: typeof PlacementsRoute
   SubmissionsRoute: typeof SubmissionsRoute
+  TasksRoute: typeof TasksRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submissions': {
       id: '/submissions'
       path: '/submissions'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   PlacementsRoute: PlacementsRoute,
   SubmissionsRoute: SubmissionsRoute,
+  TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
