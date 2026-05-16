@@ -17,6 +17,7 @@ import { Route as PlacementsRouteImport } from './routes/placements'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as JobsRouteImport } from './routes/jobs'
 import { Route as InterviewsRouteImport } from './routes/interviews'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as CompaniesRouteImport } from './routes/companies'
 import { Route as CandidatesRouteImport } from './routes/candidates'
@@ -62,6 +63,11 @@ const InterviewsRoute = InterviewsRouteImport.update({
   path: '/interviews',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactsRoute = ContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/candidates': typeof CandidatesRoute
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
+  '/dashboard': typeof DashboardRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/candidates': typeof CandidatesRoute
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
+  '/dashboard': typeof DashboardRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/candidates': typeof CandidatesRoute
   '/companies': typeof CompaniesRoute
   '/contacts': typeof ContactsRoute
+  '/dashboard': typeof DashboardRoute
   '/interviews': typeof InterviewsRoute
   '/jobs': typeof JobsRoute
   '/login': typeof LoginRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/companies'
     | '/contacts'
+    | '/dashboard'
     | '/interviews'
     | '/jobs'
     | '/login'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/companies'
     | '/contacts'
+    | '/dashboard'
     | '/interviews'
     | '/jobs'
     | '/login'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/candidates'
     | '/companies'
     | '/contacts'
+    | '/dashboard'
     | '/interviews'
     | '/jobs'
     | '/login'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   CandidatesRoute: typeof CandidatesRoute
   CompaniesRoute: typeof CompaniesRoute
   ContactsRoute: typeof ContactsRoute
+  DashboardRoute: typeof DashboardRoute
   InterviewsRoute: typeof InterviewsRoute
   JobsRoute: typeof JobsRoute
   LoginRoute: typeof LoginRoute
@@ -244,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InterviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contacts': {
       id: '/contacts'
       path: '/contacts'
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   CandidatesRoute: CandidatesRoute,
   CompaniesRoute: CompaniesRoute,
   ContactsRoute: ContactsRoute,
+  DashboardRoute: DashboardRoute,
   InterviewsRoute: InterviewsRoute,
   JobsRoute: JobsRoute,
   LoginRoute: LoginRoute,
