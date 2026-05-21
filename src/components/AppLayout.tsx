@@ -11,6 +11,7 @@ import {
 import logo from "@/assets/aptivon-logo.png";
 import { cn } from "@/lib/utils";
 import { useCompanies, useContacts, useJobs, useCandidates } from "@/lib/queries";
+import { ChatBubble } from "@/components/ChatBubble";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
 
@@ -67,6 +68,7 @@ export function AppLayout() {
           </nav>
         </div>
       </div>
+      <ChatBubble />
       <Toaster position="top-right" richColors />
     </CreateProvider>
   );
