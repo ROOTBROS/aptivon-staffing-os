@@ -200,7 +200,7 @@ function MessageBlock({ message }: { message: AnyMessage }) {
         {message.parts.map((part, i) => {
           if (part.type === "text") {
             return (
-              <div key={i} className={cn("prose prose-sm max-w-none break-words", isUser ? "prose-invert" : "dark:prose-invert")}>
+              <div key={i} className="markdown-body break-words text-sm leading-relaxed [&_p]:my-1 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[12px] [&_a]:underline">
                 <ReactMarkdown>{part.text}</ReactMarkdown>
               </div>
             );
